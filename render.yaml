@@ -1,0 +1,33 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: campus-lost-found-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false # Set this securely in the Render dashboard!
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Frontend Static Site
+  - type: web
+    name: campus-lost-found-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: campus-lost-found-backend
+          envVarKey: RENDER_EXTERNAL_URL
+        # We append /api to the backend URL dynamically using a rewrite if needed, 
+        # but since Render currently injects the bare URL, we might need to handle this.
+        # Alternatively, manually set VITE_API_URL in Render Dashboard to:
+        # https://<your-backend-url>.onrender.com/api
